@@ -51,19 +51,19 @@
                                                    },
                                                    {
                                                        @"testInput\hello_world.c",
-                                                       @"hello_world.c\eb29fc180f89bb0a24b40648bfb984c2c6d7af5f\hello_world.c"
+                                                       @"hello_world.c\73f6b02845272f2da5edd99732e25362a6f1d99f\hello_world.c"
                                                    },
                                                    {
                                                        @"testInput\hello_world.cpp",
-                                                       @"hello_world.cpp\eb29fc180f89bb0a24b40648bfb984c2c6d7af5f\hello_world.cpp"
+                                                       @"hello_world.cpp\73f6b02845272f2da5edd99732e25362a6f1d99f\hello_world.cpp"
                                                    }
                                                };
 
             foreach (var pair in sourceFileToStoreFileMap)
             {
                 Assert.AreEqual(
-                    this.store.GetStorePath(pair.Key),
                     Path.Combine(this.store.SourceStoreDirectory, pair.Value),
+                    this.store.GetStorePath(pair.Key),
                     true);
             }
         }

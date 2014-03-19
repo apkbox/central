@@ -4,44 +4,43 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    internal static class Util
+    public static class Util
     {
         public static string GetCommonPath(IEnumerable<string> paths)
         {
-            return string.Join(
-                "/",
-                paths.Select(s => s.Split('/').AsEnumerable())
-                    .Transpose()
-                    .TakeWhile(s => s.All(d => d == s.First()))
-                    .Select(s => s.First()));
+            return FindCommonPath(@"\", paths);
         }
 
         public static string GetCommonPath(string path1, string path2)
         {
-            var xs = new[] { path1, path2 };
-
-            return string.Join(
-                "/",
-                xs.Select(s => s.Split('/').AsEnumerable())
-                    .Transpose()
-                    .TakeWhile(s => s.All(d => d == s.First()))
-                    .Select(s => s.First()));
+            return FindCommonPath(@"\", new string[] { path1, path2 });
         }
 
-        public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> source)
+        public static string FindCommonPath(string Separator, IEnumerable<string> Paths)
         {
-            var enumerators = source.Select(e => e.GetEnumerator()).ToArray();
-            try
+            string CommonPath = String.Empty;
+            List<string> SeparatedPath = Paths
+                .First(str => str.Length == Paths.Max(st2 => st2.Length))
+                .Split(new string[] { Separator }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+
+            foreach (string PathSegment in SeparatedPath.AsEnumerable())
             {
-                while (enumerators.All(e => e.MoveNext()))
+                if (CommonPath.Length == 0 && Paths.All(str => str.StartsWith(PathSegment)))
                 {
-                    yield return enumerators.Select(e => e.Current).ToArray();
+                    CommonPath = PathSegment;
+                }
+                else if (Paths.All(str => str.StartsWith(CommonPath + Separator + PathSegment)))
+                {
+                    CommonPath += Separator + PathSegment;
+                }
+                else
+                {
+                    break;
                 }
             }
-            finally
-            {
-                Array.ForEach(enumerators, e => e.Dispose());
-            }
+
+            return CommonPath;
         }
     }
 }

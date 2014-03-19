@@ -1,5 +1,6 @@
 ﻿namespace Central.SymStore
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
@@ -8,7 +9,16 @@
     {
         private readonly List<string> files = new List<string>();
 
-        private const string SymstoreExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\symstore.exe";
+        private const string SymstoreExe = @"C:\Program Files\Windows Kits\8.1\Debuggers\x86\symstore.exe";
+
+        public SymbolStoreAddTransaction()
+        {
+        }
+
+        public SymbolStoreAddTransaction(string product)
+        {
+            this.Product = product;
+        }
 
         public bool Compress { get; set; }
 
@@ -19,11 +29,16 @@
 
         public void AddFile(string file)
         {
-            this.files.Add(Path.GetFullPath(file));
+            var path = Path.GetFullPath(file);
+            this.files.Add(path);
         }
 
         internal override void Commit(string symbolStoreDirectory)
         {
+            if (string.IsNullOrEmpty(this.Product))
+            {
+                throw new InvalidOperationException("Product property must be a non empty string.");
+            }
             var commonPath = Util.GetCommonPath(this.files);
             var indexFile = Path.GetTempFileName();
             this.GenerateIndex(commonPath, indexFile);
@@ -77,17 +92,17 @@
             commandLine.Add("/o");
             commandLine.Add(string.Format("/s \"{0}\"", storeDirectory));
 
-            if (this.Comment.Length > 0)
+            if (!string.IsNullOrEmpty(this.Comment))
             {
                 commandLine.Add(string.Format("/c \"{0}\"", this.Comment.Replace("\"", "\\\"")));
             }
 
-            if (this.Product.Length > 0)
+            if (!string.IsNullOrEmpty(this.Product))
             {
                 commandLine.Add(string.Format("/t \"{0}\"", this.Product.Replace("\"", "\\\"")));
             }
 
-            if (this.Version.Length > 0)
+            if (!string.IsNullOrEmpty(this.Version))
             {
                 commandLine.Add(string.Format("/v \"{0}\"", this.Version.Replace("\"", "\\\"")));
             }

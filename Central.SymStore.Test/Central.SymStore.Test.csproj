@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FF882936-97C6-4396-B19D-1DF0E02D6F94}</ProjectGuid>
+    <ProjectGuid>{4CFE4D5B-F899-4ADB-8B5E-96301062A5B8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Central.SrcSrv.Test</RootNamespace>
-    <AssemblyName>Central.SrcSrv.Test</AssemblyName>
+    <RootNamespace>Central.SymStore.Test</RootNamespace>
+    <AssemblyName>Central.SymStore.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -16,7 +16,6 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,35 +53,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="SourceStoreTest.cs" />
+    <Compile Include="UtilTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Central.SrcSrv\Central.SrcSrv.csproj">
-      <Project>{edd8a24e-8e5f-4d10-a8dd-6bd510cc05bf}</Project>
-      <Name>Central.SrcSrv</Name>
+    <ProjectReference Include="..\Central.SymStore\Central.SymStore.csproj">
+      <Project>{adfc8c93-2bec-48f5-b372-2e362775ef84}</Project>
+      <Name>Central.SymStore</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Content Include="testInput\dir1\hello_world.c">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="testInput\dir1\hello_world.cpp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="testInput\dir2\hello_world.c">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="testInput\dir2\hello_world.cpp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="testInput\hello_world.c">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="testInput\hello_world.cpp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

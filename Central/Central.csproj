@@ -54,6 +54,16 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Central.SrcSrv\Central.SrcSrv.csproj">
+      <Project>{edd8a24e-8e5f-4d10-a8dd-6bd510cc05bf}</Project>
+      <Name>Central.SrcSrv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Central.SymStore\Central.SymStore.csproj">
+      <Project>{adfc8c93-2bec-48f5-b372-2e362775ef84}</Project>
+      <Name>Central.SymStore</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
