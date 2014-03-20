@@ -1,11 +1,10 @@
-﻿using System;
-using System.Linq;
-
-namespace Central
+﻿namespace Central
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
 
     using Central.SrcSrv;
     using Central.SymStore;
@@ -55,7 +54,6 @@ namespace Central
 
             using (var tempScope = new TempScope())
             {
-
                 // Source index PDB files
                 foreach (PdbFile pdbFile in pdbFiles)
                 {
@@ -66,20 +64,30 @@ namespace Central
                     srcsrvStream.WriteLine(@"VERCTRL=fileshare");
                     srcsrvStream.WriteLine(@"DATETIME={0}", DateTime.Now);
                     srcsrvStream.WriteLine(@"SRCSRV: variables ------------------------------------------");
-                    srcsrvStream.WriteLine(@"SRCSRVTRG=%sdtrg%");
-                    srcsrvStream.WriteLine(@"SRCSRVCMD=%sdcmd%");
+                    srcsrvStream.WriteLine(@"SRCSRVTRG=%targ%\%var2%\%var4%\%fnfile%(%var1%)");
+                    srcsrvStream.WriteLine(@"SRCSRVCMD=copy %SOURCE_REPO%\%var3% %srcsrvtrg%");
                     srcsrvStream.WriteLine(@"SRCSRVENV=var1=string1\bvar2=string2");
-                    srcsrvStream.WriteLine(@"SDCMD=copy %fnvar%(%var2%) %srcsrvtrg%");
-                    srcsrvStream.WriteLine(@"SDTRG=%targ%\%var2%\%fnbksl%(%var3%)\%var4%\%fnfile%(%var1%)");
+                    srcsrvStream.WriteLine(@"SOURCE_REPO={0}", sourceStoreDirectory);
                     srcsrvStream.WriteLine(@"SRCSRV: source files ---------------------------------------");
 
                     foreach (var sourceFile in pdbFile.SourceFiles)
                     {
-                        srcsrvStream.WriteLine(@"{0}*{1}", sourceFile, sourceStore.GetStorePath(sourceFile));
+                        var relativeSourceFilePath = sourceFile.Substring(buildDirectory.Length);
+
+                        // var1 - Original full source file path
+                        // var2 - Source file path relative to the project root
+                        // var3 - Relative path in the source store
+                        // var4 - Source file SHA-1 hash
+                        srcsrvStream.WriteLine(@"{0}*{1}*{2}*{3}", sourceFile, relativeSourceFilePath,
+                            SourceStore.GetRelativeStorePath(sourceFile),
+                            SourceStore.GetFileHash(sourceFile));
                     }
 
                     srcsrvStream.WriteLine(@"SRCSRV: end ------------------------------------------------");
                     srcsrvStream.Close();
+
+                    // Now call PDBstr
+                    string.Format("PDBstr -w \"-p:{0}\" \"-i:{1]\" -s:srcsrv", pdbFile.FileName, srcSrvIniFile); 
                 }
             }
         }

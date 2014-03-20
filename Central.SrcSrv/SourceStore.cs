@@ -16,6 +16,32 @@
         {
         }
 
+        public static string GetRelativeStorePath(string filePath)
+        {
+            if (filePath == null)
+            {
+                throw new ArgumentException("File path cannot be empty", "filePath");
+            }
+
+            string fileHash = GetFileHash(filePath);
+            string fileName = Path.GetFileName(filePath);
+
+            return Path.Combine(Path.Combine(fileName, fileHash), fileName);
+        }
+
+        public static string GetFileHash(string filePath)
+        {
+            string fileHash;
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                using (var sha1 = new SHA1Managed())
+                {
+                    fileHash = BitConverter.ToString(sha1.ComputeHash(stream)).Replace("-", string.Empty).ToLowerInvariant();
+                }
+            }
+            return fileHash;
+        }
+
         public string GetStorePath(string filePath)
         {
             if (this.SourceStoreDirectory == null)
