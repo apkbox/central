@@ -1,11 +1,15 @@
 ﻿namespace Central.SrcSrv
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Security.Cryptography;
 
     public class SourceStore
     {
+        private const string SrcToolExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\srcsrv\srctool.exe";
+
         public string SourceStoreDirectory { get; set; }
 
         public SourceStore()
@@ -54,6 +58,43 @@
             }
 
             return storeFilePath;
+        }
+
+        public static List<string> GetSourceFilesFromPdb(string pdbFile)
+        {
+            var sourceFiles = new List<string>();
+
+            var process = new Process();
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.FileName = SrcToolExe;
+            process.StartInfo.Arguments = CreateSrcToolCommandLine(pdbFile);
+            process.StartInfo.RedirectStandardOutput = true;
+            // process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            while (true)
+            {
+                var sourceFileReference = process.StandardOutput.ReadLine();
+                if (sourceFileReference == null)
+                {
+                    break;
+                }
+
+                sourceFiles.Add(sourceFileReference);
+            }
+
+            process.WaitForExit();
+
+            return sourceFiles;
+        }
+
+        private static string CreateSrcToolCommandLine(string pdbFile)
+        {
+            var commandLine = new List<string>();
+
+            commandLine.Add("-r");
+            commandLine.Add(string.Format("\"{0}\"", pdbFile));
+
+            return string.Join(" ", commandLine.ToArray());
         }
     }
 }

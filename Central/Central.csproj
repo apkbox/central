@@ -63,6 +63,10 @@
       <Project>{adfc8c93-2bec-48f5-b372-2e362775ef84}</Project>
       <Name>Central.SymStore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Central.Util\Central.Util.csproj">
+      <Project>{3D3FFD34-2141-461C-BCE7-2AE0D6F1DF08}</Project>
+      <Name>Central.Util</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

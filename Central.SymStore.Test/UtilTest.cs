@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace Central.SymStore.Test
 {
+    using Central.Util;
+
     [TestClass]
     public class UtilTest
     {
@@ -11,14 +13,14 @@ namespace Central.SymStore.Test
         public void TestMethod1()
         {
             Assert.AreEqual(@"aaaa",
-                Central.SymStore.Util.GetCommonPath(@"aaaa\bbbb", @"aaaa\cccc"));
+                PathUtil.GetCommonPath(@"aaaa\bbbb", @"aaaa\cccc"));
         }
 
         [TestMethod]
         public void TestMethod2()
         {
             Assert.AreEqual(@"aaaa\bbbb",
-                Central.SymStore.Util.FindCommonPath(@"\", new List<string>() {
+                PathUtil.FindCommonPath(@"\", new List<string>() {
                     @"aaaa\bbbb",
                     @"aaaa\bbbb\ccccc",
                     @"aaaa\bbbb\sdfsdf",
