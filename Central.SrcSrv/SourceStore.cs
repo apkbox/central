@@ -9,6 +9,7 @@
     public class SourceStore
     {
         private const string SrcToolExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\srcsrv\srctool.exe";
+        private const string PdbStrExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\srcsrv\pdbstr.exe";
 
         public string SourceStoreDirectory { get; set; }
 
@@ -119,6 +120,33 @@
 
             commandLine.Add("-r");
             commandLine.Add(string.Format("\"{0}\"", pdbFile));
+
+            return string.Join(" ", commandLine.ToArray());
+        }
+
+        public static List<string> AddStreamToPdb(string pdbFile, string srcsrvIniFile)
+        {
+            var sourceFiles = new List<string>();
+
+            var process = new Process();
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.FileName = PdbStrExe;
+            process.StartInfo.Arguments = CreatePdbstrCommandLine(pdbFile, srcsrvIniFile);
+            // process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            process.WaitForExit();
+
+            return sourceFiles;
+        }
+
+        private static string CreatePdbstrCommandLine(string pdbFile, string srcsrvIniFile)
+        {
+            var commandLine = new List<string>();
+
+            commandLine.Add("-w");
+            commandLine.Add(string.Format("\"-p:{0}\"", pdbFile));
+            commandLine.Add(string.Format("\"-i:{0}\"", srcsrvIniFile));
+            commandLine.Add("-s:srcsrv");
 
             return string.Join(" ", commandLine.ToArray());
         }
