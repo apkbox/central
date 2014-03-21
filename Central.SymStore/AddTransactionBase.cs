@@ -1,7 +1,9 @@
 ﻿namespace Central.SymStore
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
 
     using Central.Util;
 
@@ -10,9 +12,16 @@
         /// <summary>
         /// The location of symstore utility.
         /// </summary>
-        protected const string SymstoreExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\symstore.exe";
+        protected static string SymstoreExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\symstore.exe";
 
         private readonly TempScope tempScope = new TempScope();
+
+        static AddTransactionBase()
+        {
+            SymstoreExe = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                @"Windows Kits\8.1\Debuggers\x86\symstore.exe");
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddTransactionBase"/> class.

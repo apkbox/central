@@ -28,8 +28,11 @@
 
             var pdbFiles = new List<PdbFile>();
 
+            IEnumerable<string> symbolFiles = Directory.EnumerateFileSystemEntries(buildDirectory, "*.pdb", SearchOption.AllDirectories).Union(
+                Directory.EnumerateFileSystemEntries(buildDirectory, "*.exe", SearchOption.AllDirectories));
+
             // Collect PDB files and extract source file information.
-            foreach (var pdbFilePath in Directory.EnumerateFileSystemEntries(buildDirectory, "*.pdb", SearchOption.AllDirectories))
+            foreach (var pdbFilePath in symbolFiles)
             {
                 Console.WriteLine("=============== " + pdbFilePath);
 
@@ -40,12 +43,20 @@
                 foreach (var sourceFilePath in sourceFiles)
                 {
                     var commonPath = PathUtil.GetCommonPath(buildDirectory, sourceFilePath);
-                    if (commonPath.StartsWith(buildDirectory, StringComparison.OrdinalIgnoreCase) && 
-                        File.Exists(sourceFilePath) &&
-                        !sourceFilePath.EndsWith(".pch", StringComparison.OrdinalIgnoreCase))
+                    var isCommon = commonPath.StartsWith(buildDirectory, StringComparison.OrdinalIgnoreCase);
+                    var exists = File.Exists(sourceFilePath);
+                    var notPch = !sourceFilePath.EndsWith(".pch", StringComparison.OrdinalIgnoreCase);
+                    if (isCommon && exists && notPch)
                     {
                         Console.WriteLine("    " + sourceFilePath);
                         pdbFile.AddSourceFile(sourceFilePath);
+                    }
+                    else
+                    {
+                        Console.WriteLine("    skipped: " + sourceFilePath);
+                        Console.WriteLine("       build: " + buildDirectory);
+                        Console.WriteLine("       common: " + commonPath);
+                        Console.WriteLine("         {0} {1} {2}: ", isCommon, exists, notPch);
                     }
                 }
             }
@@ -53,8 +64,13 @@
             var sourceStore = new SourceStore();
             sourceStore.SourceStoreDirectory = sourceStoreDirectory;
 
+            var symbolStore = new SymbolStore();
+            symbolStore.SymbolStoreDirectory = symbolStoreDirectory;
+
             using (var tempScope = new TempScope())
             {
+                var trans = new AddFilesTransaction("Test product");
+
                 // Source index PDB files
                 foreach (var pdbFile in pdbFiles)
                 {
@@ -92,8 +108,11 @@
                     srcsrvStream.WriteLine(@"SRCSRV: end ------------------------------------------------");
                     srcsrvStream.Close();
 
-                    SourceStore.AddStreamToPdb(pdbFile.FileName, srcSrvIniFile); 
+                    SourceStore.AddStreamToPdb(pdbFile.FileName, srcSrvIniFile);
+                    trans.AddFile(pdbFile.FileName);
                 }
+
+                symbolStore.Commit(trans);
             }
         }
 
