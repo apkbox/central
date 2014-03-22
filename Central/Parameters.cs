@@ -39,8 +39,12 @@
                 .Callback(this.SetBuildDirectory);
 
             p.Setup<List<string>>("src")
-                .WithDescription("Source file or a directory containing source files.")
+                .WithDescription("Source code root directory.")
                 .Callback(this.AddSourceLocationFromCliParameter);
+
+            p.Setup<List<string>>("srcmap")
+                .WithDescription("Maps source code directory.")
+                .Callback(this.AddSourceMapFromCliParameter);
 
             p.Setup<List<string>>("bin")
                 .WithDescription("Symbol file or a directory containing binary files.")
@@ -117,6 +121,19 @@
             //  C:\
 
             return true;
+        }
+
+        private void AddSourceMapFromCliParameter(List<string> maps)
+        {
+            for (var i = 0; i < this.Sources.Count; i++)
+            {
+                if (i >= maps.Count)
+                {
+                    break;
+                }
+
+                this.Sources[i].OriginalPath = maps[i];
+            }
         }
 
         public bool Validate()

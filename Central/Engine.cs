@@ -113,10 +113,7 @@
 
                     foreach (var sourceFile in pdbFile.SourceFiles)
                     {
-                        // TODO: This is a temporary workaround
-                        var root = Path.GetPathRoot(sourceFile);
-                        var relativeSourceFilePath = root != null ? sourceFile.Substring(root.Length) : sourceFile;
-                        // var relativeSourceFilePath = sourceFile.Substring(this.parameters.Sources.Length);
+                        var relativeSourceFilePath = sourceFile.Substring(this.parameters.Sources[0].Path.Length);
 
                         // var1 - Original full source file path
                         // var2 - Source file path relative to the project root
@@ -150,6 +147,8 @@
 
         private bool IsSourceFileCollectable(string sourceFilePath)
         {
+            // TODO: Remap path if mapping is provided
+
             if (!File.Exists(sourceFilePath))
             {
                 return false;
