@@ -89,6 +89,8 @@
 
             Directory.CreateDirectory(storeFileDirectory);
 
+            // TODO: Note that just like in symbol store we have to store
+            // a record if file come from different location.
             if (!File.Exists(storeFilePath))
             {
                 File.Copy(filePath, storeFilePath, true);
