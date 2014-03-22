@@ -12,11 +12,11 @@
     {
         public Parameters()
         {
-            this.Sources = new List<string>();
+            this.Sources = new List<SourceTreeRoot>();
             this.Binaries = new List<string>();
         }
 
-        public List<string> Sources { get; private set; }
+        public List<SourceTreeRoot> Sources { get; private set; }
 
         public List<string> Binaries { get; private set; }
 
@@ -93,7 +93,30 @@
                 return false;
             }
 
-            return !result.HasErrors;
+            if (result.HasErrors)
+            {
+                return false;
+            }
+
+            // TODO: Go through this.Sources and find common ancestor
+            // Always consider directory at the root level
+            // This set:
+            //  C:\sourcetree1\public\src
+            //  C:\sourcetree1\
+            //  C:\sourcetree2\other\src
+            // Results in:
+            //  C:\sourcetree1\
+            //  C:\sourcetree2\other\src
+            // 
+            // However, this set:
+            //  C:\
+            //  C:\mysourcetree1\public\src
+            //  C:\sourcetree1\
+            //  C:\sourcetree2\other\src
+            // Results in:
+            //  C:\
+
+            return true;
         }
 
         public bool Validate()
@@ -127,7 +150,7 @@
 
         private void SetBuildDirectory(string location)
         {
-            this.Sources.Add(location);
+            this.Sources.Add(new SourceTreeRoot(location));
             this.Binaries.Add(location);
         }
 
@@ -153,7 +176,10 @@
 
         private void AddSourceLocationFromCliParameter(List<string> list)
         {
-            this.Sources.AddRange(list);
+            foreach (var path in list)
+            {
+                this.Sources.Add(new SourceTreeRoot(path));
+            }
         }
 
         private void AddBinaryLocationFromCliParameter(List<string> list)

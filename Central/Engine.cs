@@ -159,7 +159,7 @@
 
             foreach (var collectablePrefix in this.parameters.Sources)
             {
-                var prefix = collectablePrefix.ToLowerInvariant();
+                var prefix = collectablePrefix.Path.ToLowerInvariant();
                 var commonPrefix = PathUtil.GetCommonPath(prefix, normalizedSourcePath);
                 if (commonPrefix == prefix)
                 {
