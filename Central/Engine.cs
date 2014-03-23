@@ -74,12 +74,12 @@
 
                 foreach (var sourceFileReference in sourceFileReferences)
                 {
-                    var mappedFile = FindFileMapping(sourceFileReference);
+                    var reference = FindFileMapping(sourceFileReference);
 
-                    if (this.IsSourceFileCollectable(mappedFile))
+                    if (this.IsSourceFileCollectable(reference.MappedFile))
                     {
-                        Console.WriteLine("    " + sourceFileReference + " as " + mappedFile);
-                        pdbFile.AddSourceFile(mappedFile);
+                        Console.WriteLine("    " + sourceFileReference + " as " + reference.MappedFile);
+                        pdbFile.AddSourceFile(reference);
                     }
                 }
             }
@@ -117,7 +117,7 @@
 
                     foreach (var sourceFile in pdbFile.SourceFiles)
                     {
-                        var relativeSourceFilePath = sourceFile.Substring(this.parameters.Sources[0].Path.Length);
+                        var relativeSourceFilePath = sourceFile.RelativePath;
 
                         // var1 - Original full source file path
                         // var2 - Source file path relative to the project root
@@ -125,12 +125,12 @@
                         // var4 - Source file SHA-1 hash
                         srcSrvIniStream.WriteLine(
                             @"{0}*{1}*{2}*{3}",
-                            sourceFile,
+                            sourceFile.SourceFile,
                             relativeSourceFilePath,
-                            SourceStore.GetRelativeStorePath(sourceFile),
-                            SourceStore.GetFileHash(sourceFile));
+                            SourceStore.GetRelativeStorePath(sourceFile.SourceFile),
+                            SourceStore.GetFileHash(sourceFile.SourceFile));
 
-                        sourceStore.AddFile(sourceFile);
+                        sourceStore.AddFile(sourceFile.MappedFile);
                     }
 
                     srcSrvIniStream.WriteLine(@"SRCSRV: end ------------------------------------------------");
@@ -149,17 +149,18 @@
             }
         }
 
-        private string FindFileMapping(string sourceFileReference)
+        private SourceFileReference FindFileMapping(string sourceFileReference)
         {
             foreach (var sourceTreeRoot in this.parameters.Sources)
             {
+                var relativePath = PathUtil.GetRelativePath(sourceTreeRoot.OriginalPath, sourceFileReference);
                 var retargetedPath = PathUtil.AppendRelativePath(
                     sourceTreeRoot.OriginalPath,
                     sourceFileReference,
                     sourceTreeRoot.Path);
                 if (retargetedPath != null)
                 {
-                    return retargetedPath;
+                    return new SourceFileReference(sourceFileReference, retargetedPath, relativePath);
                 }
             }
 

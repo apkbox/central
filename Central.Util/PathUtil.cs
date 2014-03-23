@@ -18,6 +18,17 @@
             return false;
         }
 
+        public static string GetRelativePath(string parent, string child)
+        {
+            var commonPath = GetCommonPath(parent.ToLowerInvariant(), child.ToLowerInvariant()).ToLowerInvariant();
+            if (commonPath.ToLowerInvariant() == parent.ToLowerInvariant())
+            {
+                return child.Substring(commonPath.Length);
+            }
+
+            return null;
+        }
+
         public static string AppendRelativePath(string parent, string child, string other)
         {
             var commonPath = GetCommonPath(parent.ToLowerInvariant(), child.ToLowerInvariant()).ToLowerInvariant();
