@@ -42,10 +42,6 @@
                 .WithDescription("Source code root directory.")
                 .Callback(this.AddSourceLocationFromCliParameter);
 
-            p.Setup<List<string>>("srcmap")
-                .WithDescription("Maps source code directory.")
-                .Callback(this.AddSourceMapFromCliParameter);
-
             p.Setup<List<string>>("bin")
                 .WithDescription("Symbol file or a directory containing binary files.")
                 .Callback(this.AddBinaryLocationFromCliParameter);
@@ -123,19 +119,6 @@
             return true;
         }
 
-        private void AddSourceMapFromCliParameter(List<string> maps)
-        {
-            for (var i = 0; i < this.Sources.Count; i++)
-            {
-                if (i >= maps.Count)
-                {
-                    break;
-                }
-
-                this.Sources[i].OriginalPath = maps[i];
-            }
-        }
-
         public bool Validate()
         {
             if (this.SourceStore == null)
@@ -195,7 +178,14 @@
         {
             foreach (var path in list)
             {
-                this.Sources.Add(new SourceTreeRoot(path));
+                var mapping = path.Split(new[] { "*" }, StringSplitOptions.RemoveEmptyEntries);
+                var sourceTreeRoot = new SourceTreeRoot(mapping[0].Trim());
+                if (mapping.Length >= 2 && !string.IsNullOrEmpty(mapping[1].Trim()))
+                {
+                    sourceTreeRoot.OriginalPath = mapping[1].Trim();
+                }
+
+                this.Sources.Add(sourceTreeRoot);
             }
         }
 

@@ -2,7 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Odbc;
     using System.IO;
+    using System.IO.MemoryMappedFiles;
     using System.Linq;
 
     using Central.SrcSrv;
@@ -68,14 +70,16 @@
             foreach (var pdbFile in this.pdbFiles)
             {
                 Console.WriteLine("==== " + pdbFile.FileName);
-                var sourceFiles = SourceStore.GetSourceFilesFromPdb(pdbFile.FileName);
+                var sourceFileReferences = SourceStore.GetSourceFilesFromPdb(pdbFile.FileName);
 
-                foreach (var sourceFilePath in sourceFiles)
+                foreach (var sourceFileReference in sourceFileReferences)
                 {
-                    if (this.IsSourceFileCollectable(sourceFilePath))
+                    var mappedFile = FindFileMapping(sourceFileReference);
+
+                    if (this.IsSourceFileCollectable(mappedFile))
                     {
-                        Console.WriteLine("    " + sourceFilePath);
-                        pdbFile.AddSourceFile(sourceFilePath);
+                        Console.WriteLine("    " + sourceFileReference + " as " + mappedFile);
+                        pdbFile.AddSourceFile(mappedFile);
                     }
                 }
             }
@@ -145,16 +149,31 @@
             }
         }
 
-        private bool IsSourceFileCollectable(string sourceFilePath)
+        private string FindFileMapping(string sourceFileReference)
         {
-            // TODO: Remap path if mapping is provided
+            foreach (var sourceTreeRoot in this.parameters.Sources)
+            {
+                var retargetedPath = PathUtil.AppendRelativePath(
+                    sourceTreeRoot.OriginalPath,
+                    sourceFileReference,
+                    sourceTreeRoot.Path);
+                if (retargetedPath != null)
+                {
+                    return retargetedPath;
+                }
+            }
 
-            if (!File.Exists(sourceFilePath))
+            return null;
+        }
+
+        private bool IsSourceFileCollectable(string sourceFile)
+        {
+            if (sourceFile == null || !File.Exists(sourceFile))
             {
                 return false;
             }
 
-            var normalizedSourcePath = Path.GetFullPath(sourceFilePath).ToLowerInvariant();
+            var normalizedSourcePath = Path.GetFullPath(sourceFile).ToLowerInvariant();
 
             foreach (var collectablePrefix in this.parameters.Sources)
             {
