@@ -39,33 +39,40 @@
                 .Callback(this.SetBuildDirectory);
 
             p.Setup<List<string>>("src")
-                .WithDescription("Source code root directory.")
+                .WithDescription("Directory that designates source files to be collected. Utility will not collect referenced files outside this location. May be specified more than once.")
                 .Callback(this.AddSourceLocationFromCliParameter);
 
             p.Setup<List<string>>("bin")
-                .WithDescription("Symbol file or a directory containing binary files.")
+                .WithDescription("Directory containing PDB or EXE. This option may be specified more than once as soon as all directories have non-empty common path prefix.")
                 .Callback(this.AddBinaryLocationFromCliParameter);
 
             p.Setup<string>("store")
-                .WithDescription("Symbol and source store location.")
+                .WithDescription("Symbol and source store directory. Binaries are stored in src subdirectory, while sources are stored in sym subdirectory.")
                 .Callback(this.SetStoreLocation);
 
             p.Setup<string>("srcstore")
-                .WithDescription("Source store location.")
+                .WithDescription("Source store directory.")
                 .Callback(s => this.SourceStore = s);
 
             p.Setup<string>("symstore")
-                .WithDescription("Symbol store location.")
+                .WithDescription("Symbol store directory.")
                 .Callback(s => this.SymbolStore = s);
 
-            p.Setup<string>("product").WithDescription("Product name").Required().Callback(s => this.ProductName = s);
+            p.Setup<string>("product")
+                .WithDescription("Product name")
+                .Required()
+                .Callback(s => this.ProductName = s);
 
-            p.Setup<string>("version").WithDescription("Product version").Callback(s => this.ProductVersion = s);
+            p.Setup<string>("version")
+                .WithDescription("Product version")
+                .Callback(s => this.ProductVersion = s);
 
-            p.Setup<string>("comment").WithDescription("Comment").Callback(this.SetCommentFromCliParameter);
+            p.Setup<string>("comment")
+                .WithDescription("Comment")
+                .Callback(this.SetCommentFromCliParameter);
 
             p.Setup<List<string>>("exclude")
-                .WithDescription("Exclude pattern")
+                .WithDescription("Exclude files matching the specified pattern. This option can be specified more than once. The pattern matching applies to both source and PDB files.")
                 .Callback(this.SetExcludePatternFromCliParameter);
 
             p.SetupHelp("h", "help", "?")

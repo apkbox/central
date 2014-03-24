@@ -8,10 +8,7 @@ namespace Central
         {
             this.Path = path;
             this.OriginalPath = path;
-            this.Id = Guid.NewGuid();
         }
-
-        public Guid Id { get; private set; }
 
         public string Path { get; private set; }
 
