@@ -76,10 +76,14 @@
                 {
                     var reference = FindFileMapping(sourceFileReference);
 
-                    if (this.IsSourceFileCollectable(reference.MappedFile))
+                    if (reference != null && this.IsSourceFileCollectable(reference.MappedFile))
                     {
                         Console.WriteLine("    " + sourceFileReference + " as " + reference.MappedFile);
                         pdbFile.AddSourceFile(reference);
+                    }
+                    else {
+                        Console.WriteLine("    rejected: " + sourceFileReference + " as " + 
+                            (reference != null ? reference.MappedFile : string.Empty));
                     }
                 }
             }
