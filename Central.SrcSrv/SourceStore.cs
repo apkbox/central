@@ -1,5 +1,6 @@
 ﻿namespace Central.SrcSrv
 {
+    using Central.Util;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -8,20 +9,7 @@
 
     public class SourceStore
     {
-        private static readonly string SrcToolExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\srcsrv\srctool.exe";
-        private static readonly string PdbStrExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\srcsrv\pdbstr.exe";
-
         public string SourceStoreDirectory { get; set; }
-
-        static SourceStore()
-        {
-            SrcToolExe = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                @"Windows Kits\8.1\Debuggers\x86\srcsrv\srctool.exe");
-            PdbStrExe = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                @"Windows Kits\8.1\Debuggers\x86\srcsrv\pdbstr.exe");
-        }
 
         public SourceStore()
         {
@@ -105,7 +93,7 @@
 
             var process = new Process();
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = SrcToolExe;
+            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.SrcTool);
             process.StartInfo.Arguments = CreateSrcToolCommandLine(pdbFile);
             process.StartInfo.RedirectStandardOutput = true;
             // process.StartInfo.CreateNoWindow = true;
@@ -142,7 +130,7 @@
 
             var process = new Process();
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = PdbStrExe;
+            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.PdbStr);
             process.StartInfo.Arguments = CreatePdbstrCommandLine(pdbFile, srcsrvIniFile);
             // process.StartInfo.CreateNoWindow = true;
             process.Start();

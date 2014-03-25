@@ -9,19 +9,7 @@
 
     public abstract class AddTransactionBase : SymbolStoreTransaction
     {
-        /// <summary>
-        /// The location of symstore utility.
-        /// </summary>
-        protected static string SymstoreExe = @"C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64\symstore.exe";
-
         private readonly TempScope tempScope = new TempScope();
-
-        static AddTransactionBase()
-        {
-            SymstoreExe = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                @"Windows Kits\8.1\Debuggers\x86\symstore.exe");
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddTransactionBase"/> class.
@@ -117,7 +105,7 @@
         {
             var process = new Process();
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = SymstoreExe;
+            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.SymStore);
             process.StartInfo.Arguments = this.CreateYCommandLine(commonPath, indexFile, symbolStoreDirectory);
             // process.StartInfo.CreateNoWindow = true;
             process.Start();

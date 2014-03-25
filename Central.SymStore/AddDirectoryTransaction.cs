@@ -1,5 +1,6 @@
 ﻿namespace Central.SymStore
 {
+    using Central.Util;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -44,7 +45,7 @@
         {
             var process = new Process();
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = SymstoreExe;
+            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.SymStore);
             process.StartInfo.Arguments = this.CreateRecursiveXCommandLine(directory, indexFile);
             // process.StartInfo.CreateNoWindow = true;
             process.Start();

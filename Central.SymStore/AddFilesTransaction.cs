@@ -55,7 +55,7 @@
             {
                 var process = new Process();
                 process.StartInfo.UseShellExecute = false;
-                process.StartInfo.FileName = SymstoreExe;
+                process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.SymStore);
                 process.StartInfo.Arguments = this.CreateXCommandLine(commonPath, file, indexFile);
                 // process.StartInfo.CreateNoWindow = true;
                 process.Start();
