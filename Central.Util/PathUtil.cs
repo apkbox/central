@@ -5,8 +5,6 @@
     using System.IO;
     using System.Linq;
 
-
-
     public static class PathUtil
     {
         public static bool IsParent(string parent, string child)
