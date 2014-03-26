@@ -8,6 +8,7 @@
     using System.Linq;
 
     using Central.SrcSrv;
+    using Central.SrcStoreDb;
     using Central.SymStore;
     using Central.Util;
 
@@ -70,7 +71,7 @@
             foreach (var pdbFile in this.pdbFiles)
             {
                 Console.WriteLine("==== " + pdbFile.FileName);
-                var sourceFileReferences = SourceStore.GetSourceFilesFromPdb(pdbFile.FileName);
+                var sourceFileReferences = SourceStoreHelpers.GetSourceFilesFromPdb(pdbFile.FileName);
 
                 foreach (var sourceFileReference in sourceFileReferences)
                 {
@@ -92,16 +93,21 @@
         private void AnnotateAndStore()
         {
             var sourceStore = new SourceStore();
-            sourceStore.SourceStoreDirectory = this.parameters.SourceStore;
+            sourceStore.StoreDirectory = this.parameters.SourceStore;
 
             var symbolStore = new SymbolStore();
             symbolStore.SymbolStoreDirectory = this.parameters.SymbolStore;
 
             using (var tempScope = new TempScope())
             {
-                var trans = new AddFilesTransaction(this.parameters.ProductName);
-                trans.Version = this.parameters.ProductVersion;
-                trans.Comment = this.parameters.Comment;
+                var symStoreTransaction = new AddFilesTransaction(this.parameters.ProductName);
+                symStoreTransaction.Version = this.parameters.ProductVersion;
+                symStoreTransaction.Comment = this.parameters.Comment;
+
+                var srcStoreTransaction = new Transaction();
+                srcStoreTransaction.Product = this.parameters.ProductName;
+                srcStoreTransaction.Version = this.parameters.ProductVersion;
+                srcStoreTransaction.Comment = this.parameters.Comment;
 
                 // Source index PDB files
                 foreach (var pdbFile in this.pdbFiles)
@@ -134,22 +140,23 @@
                             SourceStore.GetRelativeStorePath(sourceFile.SourceFile),
                             SourceStore.GetFileHash(sourceFile.SourceFile));
 
-                        sourceStore.AddFile(sourceFile.MappedFile);
+                        srcStoreTransaction.Files.Add(sourceFile.MappedFile);
                     }
 
                     srcSrvIniStream.WriteLine(@"SRCSRV: end ------------------------------------------------");
                     srcSrvIniStream.Close();
 
-                    SourceStore.AddStreamToPdb(pdbFile.FileName, srcSrvIniFile);
-                    trans.AddFile(pdbFile.FileName);
+                    SourceStoreHelpers.AddStreamToPdb(pdbFile.FileName, srcSrvIniFile);
+                    symStoreTransaction.AddFile(pdbFile.FileName);
                 }
 
                 foreach (var binaryFile in this.binaryFiles)
                 {
-                    trans.AddFile(binaryFile);
+                    symStoreTransaction.AddFile(binaryFile);
                 }
 
-                symbolStore.Commit(trans);
+                symbolStore.Commit(symStoreTransaction);
+                sourceStore.Commit(srcStoreTransaction);
             }
         }
 

@@ -1,18 +1,37 @@
-﻿namespace Central.SrcSrv
+﻿namespace Central.SrcStoreDb
 {
-    using Central.Util;
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Security.Cryptography;
 
+    /// <summary>
+    /// The database.
+    /// </summary>
     public class SourceStore
     {
-        public string SourceStoreDirectory { get; set; }
+        public string StoreDirectory { get; set; }
 
-        public SourceStore()
+        public void Commit(Transaction transaction)
         {
+            if (this.StoreDirectory == null)
+            {
+                throw new InvalidOperationException("Store directory must be set.");
+            }
+
+            var id = this.NewTransactionId();
+            this.WriteServerRecord(id, transaction);
+            this.WriteHistoryRecord(id, transaction);
+
+            var transactionFileName = Path.Combine(this.GetAdminDir(), string.Format("{0:0000000000}", id));
+
+            // Write transaction file 00000000X
+            using (var stream = new StreamWriter(transactionFileName))
+            {
+                foreach (var file in transaction.Files)
+                {
+                    this.AddFile(id, stream, file);
+                }
+            }
         }
 
         public static string GetRelativeStorePath(string filePath)
@@ -43,9 +62,9 @@
 
         public string GetStorePath(string filePath)
         {
-            if (this.SourceStoreDirectory == null)
+            if (this.StoreDirectory == null)
             {
-                throw new InvalidOperationException("SourceStoreDirectory not specified.");
+                throw new InvalidOperationException("StoreDirectory not specified.");
             }
 
             if (filePath == null)
@@ -64,91 +83,103 @@
             }
 
             string fileStoreDirectory = Path.Combine(
-                Path.Combine(this.SourceStoreDirectory, Path.GetFileName(filePath)),
+                Path.Combine(this.StoreDirectory, Path.GetFileName(filePath)),
                 fileHash);
 
             return Path.Combine(fileStoreDirectory, Path.GetFileName(filePath));
         }
 
-        public string AddFile(string filePath)
+        private string AddFile(int transactionId, TextWriter transactionStream, string filePath)
         {
             var storeFilePath = this.GetStorePath(filePath);
             var storeFileDirectory = Path.GetDirectoryName(storeFilePath);
 
             Directory.CreateDirectory(storeFileDirectory);
-
-            // TODO: Note that just like in symbol store we have to store
-            // a record if file come from different location.
             if (!File.Exists(storeFilePath))
             {
                 File.Copy(filePath, storeFilePath, true);
             }
 
+            string fileHash = GetFileHash(filePath);
+            string fileName = Path.GetFileName(filePath);
+            transactionStream.WriteLine("\"{0}\",\"{1}\"", fileName + "\\" + fileHash, filePath);
+
+            var refsFile = Path.Combine(storeFileDirectory, @"refs.ptr");
+
+            using (var stream = new StreamWriter(refsFile, true))
+            {
+                // TODO: Quote
+                stream.WriteLine("{0:0000000000},{1},\"{2}\",", transactionId, "file", filePath);
+            }
+
             return storeFilePath;
         }
 
-        public static List<string> GetSourceFilesFromPdb(string pdbFile)
+        private void WriteServerRecord(int id, Transaction transaction)
         {
-            var sourceFiles = new List<string>();
+            this.WriteTransactionRecord(id, transaction, @"server.txt");
+        }
 
-            var process = new Process();
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.SrcTool);
-            process.StartInfo.Arguments = CreateSrcToolCommandLine(pdbFile);
-            process.StartInfo.RedirectStandardOutput = true;
-            // process.StartInfo.CreateNoWindow = true;
-            process.Start();
-            while (true)
+        private void WriteHistoryRecord(int id, Transaction transaction)
+        {
+            this.WriteTransactionRecord(id, transaction, @"history.txt");
+        }
+
+        private void WriteTransactionRecord(int id, Transaction transaction, string file)
+        {
+            var timestamp = DateTime.Now;
+            var adminDir = GetAdminDir();
+            var serverTxtPath = Path.Combine(adminDir, file);
+            using (var stream = new StreamWriter(serverTxtPath, true))
             {
-                var sourceFileReference = process.StandardOutput.ReadLine();
-                if (sourceFileReference == null)
+                // TODO: Quote
+                stream.WriteLine(
+                    "{0:0000000000},{1},{2},{3},{4},\"{5}\",\"{6}\",\"{7}\",",
+                    id,
+                    "add",
+                    "file",
+                    timestamp.ToShortDateString(),
+                    timestamp.ToShortTimeString(),
+                    transaction.Product,
+                    transaction.Version,
+                    transaction.Comment);
+            }
+        }
+
+        private int NewTransactionId()
+        {
+            var adminDir = this.GetAdminDir();
+            Directory.CreateDirectory(adminDir);
+            var lastidTxtPath = Path.Combine(adminDir, @"lastid.txt");
+            var id = 0;
+
+            using (var stream = File.Open(lastidTxtPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+            {
+                var reader = new StreamReader(stream);
+                var idline = reader.ReadLine();
+                if (!int.TryParse(idline, out id))
                 {
-                    break;
+                    id = 0;
                 }
 
-                sourceFiles.Add(sourceFileReference);
+                stream.Seek(0, SeekOrigin.Begin);
+                id++;
+                var writer = new StreamWriter(stream);
+                {
+                    writer.Write("{0:0000000000}", id);
+                }
+
+                writer.Flush();
             }
 
-            process.WaitForExit();
-
-            return sourceFiles;
+            return id;
         }
 
-        private static string CreateSrcToolCommandLine(string pdbFile)
+        private string GetAdminDir()
         {
-            var commandLine = new List<string>();
-
-            commandLine.Add("-r");
-            commandLine.Add(string.Format("\"{0}\"", pdbFile));
-
-            return string.Join(" ", commandLine.ToArray());
-        }
-
-        public static List<string> AddStreamToPdb(string pdbFile, string srcsrvIniFile)
-        {
-            var sourceFiles = new List<string>();
-
-            var process = new Process();
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.PdbStr);
-            process.StartInfo.Arguments = CreatePdbstrCommandLine(pdbFile, srcsrvIniFile);
-            // process.StartInfo.CreateNoWindow = true;
-            process.Start();
-            process.WaitForExit();
-
-            return sourceFiles;
-        }
-
-        private static string CreatePdbstrCommandLine(string pdbFile, string srcsrvIniFile)
-        {
-            var commandLine = new List<string>();
-
-            commandLine.Add("-w");
-            commandLine.Add(string.Format("\"-p:{0}\"", pdbFile));
-            commandLine.Add(string.Format("\"-i:{0}\"", srcsrvIniFile));
-            commandLine.Add("-s:srcsrv");
-
-            return string.Join(" ", commandLine.ToArray());
+            var adminDir = Path.Combine(this.StoreDirectory, "000Admin");
+            Directory.CreateDirectory(adminDir);
+            return adminDir;
         }
     }
 }

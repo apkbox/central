@@ -56,7 +56,7 @@
                             SearchOption.AllDirectories))
                 {
                     Console.WriteLine(pdbFile);
-                    var sourceFiles = SourceStore.GetSourceFilesFromPdb(pdbFile);
+                    var sourceFiles = SourceStoreHelpers.GetSourceFilesFromPdb(pdbFile);
                     foreach (var sourceFile in sourceFiles)
                     {
                         Console.WriteLine(sourceFile);

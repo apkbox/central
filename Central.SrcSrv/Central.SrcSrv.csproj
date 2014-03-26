@@ -40,7 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SourceStore.cs" />
+    <Compile Include="SourceStoreHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Central.Util\Central.Util.csproj">

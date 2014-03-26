@@ -1,8 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Central.Util.Test
+﻿namespace Central.Util.Test
 {
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     [TestClass]
     public class PathUtilTest
     {

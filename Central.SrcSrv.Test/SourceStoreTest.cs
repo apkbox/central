@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.IO;
 
+    using Central.SrcStoreDb;
+
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -25,7 +27,7 @@
         public void Initialize()
         {
             this.store = new SourceStore();
-            this.store.SourceStoreDirectory = this.CreateUniqueTemporaryDirectory().FullName;
+            this.store.StoreDirectory = this.CreateUniqueTemporaryDirectory().FullName;
         }
 
         [TestMethod]
@@ -62,7 +64,7 @@
             foreach (var pair in sourceFileToStoreFileMap)
             {
                 Assert.AreEqual(
-                    Path.Combine(this.store.SourceStoreDirectory, pair.Value),
+                    Path.Combine(this.store.StoreDirectory, pair.Value),
                     this.store.GetStorePath(pair.Key),
                     true);
             }
