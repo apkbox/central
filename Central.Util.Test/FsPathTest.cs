@@ -17,6 +17,7 @@ namespace Central.Util.Test
             Assert.IsFalse(path.IsRooted);
             Assert.IsFalse(path.IsAbsolute);
             Assert.IsFalse(path.IsComplete);
+            Assert.AreEqual(Path.GetDirectoryName(string.Empty), path.GetDirectoryName());
         }
 
         [TestMethod]
@@ -167,11 +168,18 @@ namespace Central.Util.Test
         }
 
         [TestMethod]
-        public void PathBehavior()
+        public void PathMethodsBehavior()
         {
-            Assert.AreEqual(Path.GetExtension(@"C:\File.txt"), new FsPath(@"C:\File.txt").GetExtension());
-            Assert.AreEqual(Path.GetFileName(@"C:\File.txt"), new FsPath(@"C:\File.txt").GetFileName());
-            // TODO: Test that behavior matches System.IO.Path methods.
+            // Test that behavior matches System.IO.Path.
+            Assert.AreEqual(Path.GetDirectoryName(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").GetDirectoryName());
+            Assert.AreEqual(Path.GetExtension(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").GetExtension());
+            Assert.AreEqual(Path.GetFileName(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").GetFileName());
+            Assert.AreEqual(Path.GetFileNameWithoutExtension(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").GetFileNameWithoutExtension());
+            Assert.AreEqual(Path.GetFullPath(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").GetFullPath());
+            Assert.AreEqual(Path.GetPathRoot(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").GetPathRoot());
+            Assert.AreEqual(Path.HasExtension(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").HasExtension());
+            Assert.AreEqual(Path.IsPathRooted(@"C:\Directory\File.txt"), new FsPath(@"C:\Directory\File.txt").IsPathRooted());
         }
+
     }
 }

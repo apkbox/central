@@ -36,7 +36,7 @@ namespace Central.Util
         {
             if (path.Length == 0)
             {
-                return;
+                throw new ArgumentException("Path is not in legal form.");
             }
 
             var fragment = path;
@@ -112,6 +112,36 @@ namespace Central.Util
         public object GetFileName()
         {
             return Path.GetFileName(this.ToString());
+        }
+
+        public string GetDirectoryName()
+        {
+            return Path.GetDirectoryName(this.ToString());
+        }
+
+        public string GetFileNameWithoutExtension()
+        {
+            return Path.GetFileNameWithoutExtension(this.ToString());
+        }
+
+        public string GetFullPath()
+        {
+            return Path.GetFullPath(this.ToString());
+        }
+
+        public string GetPathRoot()
+        {
+            return Path.GetPathRoot(this.ToString());
+        }
+
+        public object HasExtension()
+        {
+            return Path.HasExtension(this.ToString());
+        }
+
+        public object IsPathRooted()
+        {
+            return Path.IsPathRooted(this.ToString());
         }
     }
 }
