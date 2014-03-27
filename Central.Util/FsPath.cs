@@ -9,22 +9,23 @@ namespace Central.Util
 {
     public class FsPath
     {
-        public FsPath ()
+        private FsPath()
         {
             this.Volume = string.Empty;
-            this.Parts = new List<string>();
+            this.Components = new List<string>();
         }
 
         public FsPath(string p)
         {
             this.Volume = string.Empty;
-            this.Parts = new List<string>();
+            this.Components = new List<string>();
             Parse(p);
         }
 
         public string Volume { get; set; }
 
-        public List<string> Parts { get; private set; }
+        // TODO: Make unmutable
+        public List<string> Components { get; private set; }
 
         public bool IsRooted { get; set; }
 
@@ -75,10 +76,11 @@ namespace Central.Util
             fragment = fragment.Replace('/', '\\');
 
             var parts = fragment.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            this.Parts.AddRange(parts);
+            this.Components.Clear();
+            this.Components.AddRange(parts);
 
             this.IsRooted = fragment.StartsWith(@"\");
-            this.IsComplete = this.Parts.Count > 0 && !fragment.EndsWith(@"\");
+            this.IsComplete = this.Components.Count > 0 && !fragment.EndsWith(@"\");
             this.IsAbsolute = this.Volume.Length > 0 && this.IsRooted;
         }
 
@@ -100,8 +102,8 @@ namespace Central.Util
                 path += '\\';
             }
 
-            path += string.Join(@"\", this.Parts);
-            if (this.Parts.Count > 0 && !this.IsComplete)
+            path += string.Join(@"\", this.Components);
+            if (this.Components.Count > 0 && !this.IsComplete)
             {
                 path += '\\';
             }
@@ -134,14 +136,100 @@ namespace Central.Util
             return Path.GetPathRoot(this.ToString());
         }
 
-        public object HasExtension()
+        public bool HasExtension()
         {
             return Path.HasExtension(this.ToString());
         }
 
-        public object IsPathRooted()
+        public bool IsPathRooted()
         {
             return Path.IsPathRooted(this.ToString());
+        }
+
+        public FsPath Combine(string right)
+        {
+            return new FsPath(Path.Combine(this.ToString(), right));
+        }
+
+        // TODO: FsPath Combine(FsPath right)
+
+        public bool IsParentOf(string child)
+        {
+            return IsParentOf(child, false);
+        }
+
+        public bool IsParentOrSelf(string child)
+        {
+            return IsParentOf(child, true);
+        }
+
+        private bool IsParentOf(string child, bool orSelf)
+        {
+            var childPath = new FsPath(child);
+
+            if (this.IsRooted ^ childPath.IsRooted)
+            {
+                return false;
+            }
+
+            if (this.IsAbsolute ^ childPath.IsAbsolute)
+            {
+                return false;
+            }
+
+            if (!this.Volume.Equals(childPath.Volume, StringComparison.OrdinalIgnoreCase)) 
+            {
+                return false;
+            }
+
+            if (orSelf && this.Components.Count > childPath.Components.Count)
+            {
+                return false;
+            }
+            else if (this.Components.Count >= childPath.Components.Count)
+            {
+                return false;
+            }
+
+            return !this.Components.Where((t, i) => !t.Equals(childPath.Components[i], StringComparison.OrdinalIgnoreCase)).Any();
+        }
+
+        public FsPath GetRelativePath(string child)
+        {
+            if (!this.IsParentOf(child))
+            {
+                return null;
+            }
+
+            var childPath = new FsPath(child);
+            var relativePath = new FsPath();
+            for (var i = this.Components.Count; i < childPath.Components.Count; i++)
+            {
+                relativePath.Components.Add(childPath.Components[i]);
+            }
+
+            relativePath.IsRooted = false;
+            relativePath.IsComplete = childPath.IsComplete;
+            relativePath.IsAbsolute = false;
+
+            return relativePath;
+        }
+
+        public FsPath AppendRelativePath(string child, string newParent)
+        {
+            var relativePath = this.GetRelativePath(child);
+            if (relativePath == null)
+            {
+                return null;
+            }
+
+            return new FsPath(newParent).Combine(relativePath.ToString());
+        }
+
+        public FsPath GetCommonParent(string other)
+        {
+            var otherPath = new FsPath(other);
+            return null;
         }
     }
 }
