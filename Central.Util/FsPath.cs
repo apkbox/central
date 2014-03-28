@@ -31,6 +31,8 @@ namespace Central.Util
 
         public bool IsAbsolute { get; set; }
 
+        // TODO: Make internal field incomplete and use !incomplete as this is
+        // more convinient/clear.
         public bool IsComplete { get; set; }
 
         private void Parse(string path)
@@ -166,18 +168,7 @@ namespace Central.Util
         private bool IsParentOf(string child, bool orSelf)
         {
             var childPath = new FsPath(child);
-
-            if (this.IsRooted ^ childPath.IsRooted)
-            {
-                return false;
-            }
-
-            if (this.IsAbsolute ^ childPath.IsAbsolute)
-            {
-                return false;
-            }
-
-            if (!this.Volume.Equals(childPath.Volume, StringComparison.OrdinalIgnoreCase)) 
+            if (!this.CanBeParentOf(childPath, orSelf))
             {
                 return false;
             }
@@ -192,6 +183,36 @@ namespace Central.Util
             }
 
             return !this.Components.Where((t, i) => !t.Equals(childPath.Components[i], StringComparison.OrdinalIgnoreCase)).Any();
+        }
+
+        /// <summary>
+        /// Checks whether the instance can in principle be a parent of 
+        /// the specified child.
+        /// </summary>
+        /// <param name="childPath"></param>
+        /// <param name="orSelf"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This method does not check actual path components.
+        /// </remarks>
+        private bool CanBeParentOf(FsPath childPath, bool orSelf)
+        {
+            if (this.IsRooted ^ childPath.IsRooted)
+            {
+                return false;
+            }
+
+            if (this.IsAbsolute ^ childPath.IsAbsolute)
+            {
+                return false;
+            }
+
+            if (!this.Volume.Equals(childPath.Volume, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public FsPath GetRelativePath(string child)
@@ -229,7 +250,31 @@ namespace Central.Util
         public FsPath GetCommonParent(string other)
         {
             var otherPath = new FsPath(other);
-            return null;
+            if (!this.CanBeParentOf(otherPath, true))
+            {
+                return null;
+            }
+
+            var commonPath = new FsPath();
+            commonPath.Volume = this.Volume;
+            commonPath.IsAbsolute = this.IsAbsolute;
+            commonPath.IsRooted = this.IsRooted;
+            if (this.Components.Count == otherPath.Components.Count)
+            {
+                commonPath.IsComplete = this.IsComplete || otherPath.IsComplete;
+            }
+
+            for (int i = 0; i < Math.Min(this.Components.Count, otherPath.Components.Count); i++)
+            {
+                if (!this.Components[i].Equals(otherPath.Components[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    break;
+                }
+
+                commonPath.Components.Add(this.Components[i]);
+            }
+            
+            return commonPath;
         }
     }
 }
