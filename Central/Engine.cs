@@ -164,7 +164,9 @@
         {
             foreach (var sourceTreeRoot in this.parameters.Sources)
             {
-                var relativePath = PathUtil.GetRelativePath(sourceTreeRoot.OriginalPath, sourceFileReference);
+                var relativePath = PathUtil.GetRelativePath(
+                    sourceTreeRoot.OriginalPath,
+                    sourceFileReference);
                 var retargetedPath = PathUtil.AppendRelativePath(
                     sourceTreeRoot.OriginalPath,
                     sourceFileReference,

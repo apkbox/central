@@ -21,7 +21,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath("C:");
             Assert.AreEqual("C:", path.Volume);
-            Assert.AreEqual(0, path.Components.Count);
+            Assert.AreEqual(0, path.Components.Length);
             Assert.AreEqual("C:", path.ToString());
             Assert.IsFalse(path.IsRooted);
             Assert.IsFalse(path.IsAbsolute);
@@ -33,7 +33,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"C:\");
             Assert.AreEqual("C:", path.Volume);
-            Assert.AreEqual(0, path.Components.Count);
+            Assert.AreEqual(0, path.Components.Length);
             Assert.AreEqual(@"C:\", path.ToString());
             Assert.IsTrue(path.IsRooted);
             Assert.IsTrue(path.IsAbsolute);
@@ -45,7 +45,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"C:\Directory\File.txt");
             Assert.AreEqual("C:", path.Volume);
-            Assert.AreEqual(2, path.Components.Count);
+            Assert.AreEqual(2, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Directory", "File.txt" }, path.Components);
             Assert.AreEqual(@"C:\Directory\File.txt", path.ToString());
             Assert.IsTrue(path.IsRooted);
@@ -58,7 +58,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"\\SERVER\Share\Directory\File.txt");
             Assert.AreEqual(@"\\SERVER", path.Volume);
-            Assert.AreEqual(3, path.Components.Count);
+            Assert.AreEqual(3, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Share", "Directory", "File.txt" }, path.Components);
             Assert.AreEqual(@"\\SERVER\Share\Directory\File.txt", path.ToString());
             Assert.IsTrue(path.IsRooted);
@@ -71,7 +71,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"Directory\File.txt");
             Assert.AreEqual(string.Empty, path.Volume);
-            Assert.AreEqual(2, path.Components.Count);
+            Assert.AreEqual(2, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Directory", "File.txt" }, path.Components);
             Assert.AreEqual(@"Directory\File.txt", path.ToString());
             Assert.IsFalse(path.IsRooted);
@@ -84,7 +84,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"\Directory\File.txt");
             Assert.AreEqual(string.Empty, path.Volume);
-            Assert.AreEqual(2, path.Components.Count);
+            Assert.AreEqual(2, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Directory", "File.txt" }, path.Components);
             Assert.AreEqual(@"\Directory\File.txt", path.ToString());
             Assert.IsTrue(path.IsRooted);
@@ -97,7 +97,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"C:Directory\File.txt");
             Assert.AreEqual("C:", path.Volume);
-            Assert.AreEqual(2, path.Components.Count);
+            Assert.AreEqual(2, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Directory", "File.txt" }, path.Components);
             Assert.AreEqual(@"C:Directory\File.txt", path.ToString());
             Assert.IsFalse(path.IsRooted);
@@ -110,7 +110,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"File.txt");
             Assert.AreEqual(string.Empty, path.Volume);
-            Assert.AreEqual(1, path.Components.Count);
+            Assert.AreEqual(1, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "File.txt" }, path.Components);
             Assert.AreEqual(@"File.txt", path.ToString());
             Assert.IsFalse(path.IsRooted);
@@ -123,7 +123,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"Directory\");
             Assert.AreEqual(string.Empty, path.Volume);
-            Assert.AreEqual(1, path.Components.Count);
+            Assert.AreEqual(1, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Directory" }, path.Components);
             Assert.AreEqual(@"Directory\", path.ToString());
             Assert.IsFalse(path.IsRooted);
@@ -136,7 +136,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"\");
             Assert.AreEqual(string.Empty, path.Volume);
-            Assert.AreEqual(0, path.Components.Count);
+            Assert.AreEqual(0, path.Components.Length);
             Assert.AreEqual(@"\", path.ToString());
             Assert.IsTrue(path.IsRooted);
             Assert.IsFalse(path.IsAbsolute);
@@ -148,7 +148,7 @@ namespace Central.Util.Test
         {
             var path = new FsPath(@"C:\\Directory\File.txt");
             Assert.AreEqual(@"C:\", path.Volume);
-            Assert.AreEqual(2, path.Components.Count);
+            Assert.AreEqual(2, path.Components.Length);
             CollectionAssert.AreEqual(new[] { "Directory", "File.txt" }, path.Components);
             Assert.AreEqual(@"C:\\Directory\File.txt", path.ToString());
             Assert.IsTrue(path.IsRooted);
