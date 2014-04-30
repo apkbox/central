@@ -26,6 +26,18 @@
 
         public void Run()
         {
+            Console.WriteLine("Collecting binaries from:");
+            foreach (var n in parameters.Binaries)
+            {
+                Console.WriteLine(n);
+            }
+
+            Console.WriteLine("Collecting sources from: ");
+            foreach (var n in parameters.Sources)
+            {
+                Console.WriteLine(n.Path);
+            }
+
             this.CollectBinaries();
             this.ExtractSourceInformation();
             this.AnnotateAndStore();
@@ -164,16 +176,12 @@
         {
             foreach (var sourceTreeRoot in this.parameters.Sources)
             {
-                var relativePath = PathUtil.GetRelativePath(
-                    sourceTreeRoot.OriginalPath,
-                    sourceFileReference);
-                var retargetedPath = PathUtil.AppendRelativePath(
-                    sourceTreeRoot.OriginalPath,
-                    sourceFileReference,
-                    sourceTreeRoot.Path);
+                var originalPath = new FsPath(sourceTreeRoot.OriginalPath);
+                var relativePath = originalPath.GetRelativePath(sourceFileReference);
+                var retargetedPath = originalPath.AppendRelativePath(sourceFileReference, sourceTreeRoot.Path);
                 if (retargetedPath != null)
                 {
-                    return new SourceFileReference(sourceFileReference, retargetedPath, relativePath);
+                    return new SourceFileReference(sourceFileReference, retargetedPath.ToString(), relativePath.ToString());
                 }
             }
 
@@ -192,8 +200,9 @@
             foreach (var collectablePrefix in this.parameters.Sources)
             {
                 var prefix = collectablePrefix.Path.ToLowerInvariant();
-                var commonPrefix = PathUtil.GetCommonPath(prefix, normalizedSourcePath);
-                if (commonPrefix == prefix)
+                if (FsPath.IsParentOrSelf(prefix, normalizedSourcePath))
+                // var commonPrefix = PathUtil.GetCommonPath(prefix, normalizedSourcePath);
+                //if (commonPrefix == prefix)
                 {
                     return true;
                 }
