@@ -24,7 +24,7 @@
 
             var transactionFileName = Path.Combine(this.GetAdminDir(), string.Format("{0:0000000000}", id));
 
-            // Write transaction file 00000000X
+            // Write transaction file 000000000X
             using (var stream = new StreamWriter(transactionFileName))
             {
                 foreach (var file in transaction.Files)
@@ -115,6 +115,12 @@
             return storeFilePath;
         }
 
+#if false
+        private bool RemoveFile(int transactionId, TextWriter transactionStream)
+        {
+
+        }
+#endif
         private void WriteServerRecord(int id, Transaction transaction)
         {
             this.WriteTransactionRecord(id, transaction, @"server.txt");
