@@ -39,7 +39,7 @@
                 .Callback(this.SetBuildDirectory);
 
             p.Setup<List<string>>("src")
-                .WithDescription("Directory that designates source files to be collected. Utility will not collect referenced files outside this location. May be specified more than once.")
+                .WithDescription("Directory where source files are to be collected. Files will not be collected outside this location. May be specified more than once.")
                 .Callback(this.AddSourceLocationFromCliParameter);
 
             p.Setup<List<string>>("bin")
@@ -47,7 +47,7 @@
                 .Callback(this.AddBinaryLocationFromCliParameter);
 
             p.Setup<string>("store")
-                .WithDescription("Symbol and source store directory. Binaries are stored in src subdirectory, while sources are stored in sym subdirectory.")
+                .WithDescription("Symbol and source store directory. Binaries are stored in sym subdirectory, while sources are stored in src subdirectory.")
                 .Callback(this.SetStoreLocation);
 
             p.Setup<string>("srcstore")

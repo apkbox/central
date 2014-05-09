@@ -14,11 +14,16 @@
         {
             var sourceFiles = new List<string>();
 
-            var process = new Process();
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = WinSdkToolResolver.GetPath(WinSdkTool.SrcTool);
-            process.StartInfo.Arguments = CreateSrcToolCommandLine(pdbFile);
-            process.StartInfo.RedirectStandardOutput = true;
+            var process = new Process
+                              {
+                                  StartInfo =
+                                      {
+                                          UseShellExecute = false,
+                                          FileName = WinSdkToolResolver.GetPath(WinSdkTool.SrcTool),
+                                          Arguments = CreateSrcToolCommandLine(pdbFile),
+                                          RedirectStandardOutput = true
+                                      }
+                              };
             // process.StartInfo.CreateNoWindow = true;
             process.Start();
             while (true)
